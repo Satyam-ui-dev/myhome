@@ -434,6 +434,979 @@
       "timestamp": 1795184029,
       "device": "light",
       "state": 0
+    },
+    {
+      "boot": 1073991101,
+      "id": 1,
+      "timestamp": 1795184512,
+      "device": "light",
+      "state": 1
+    },
+    {
+      "boot": 1073991101,
+      "id": 2,
+      "timestamp": 1795184513,
+      "device": "light",
+      "state": 0
+    },
+    {
+      "boot": 1073991101,
+      "id": 3,
+      "timestamp": 1795184514,
+      "device": "light",
+      "state": 1
+    },
+    {
+      "boot": 1073991101,
+      "id": 4,
+      "timestamp": 1795184514,
+      "device": "light",
+      "state": 0
+    },
+    {
+      "boot": 1073991101,
+      "id": 5,
+      "timestamp": 1795184515,
+      "device": "light",
+      "state": 1
+    },
+    {
+      "boot": 1073991101,
+      "id": 6,
+      "timestamp": 1795184517,
+      "device": "light",
+      "state": 0
+    },
+    {
+      "boot": 1073991101,
+      "id": 7,
+      "timestamp": 1795184574,
+      "device": "light",
+      "state": 1
+    },
+    {
+      "boot": 1073991101,
+      "id": 8,
+      "timestamp": 1795184576,
+      "device": "light",
+      "state": 0
+    },
+    {
+      "boot": 1073991101,
+      "id": 9,
+      "timestamp": 1795184579,
+      "device": "light2",
+      "state": 1
+    },
+    {
+      "boot": 1073991101,
+      "id": 10,
+      "timestamp": 1795184581,
+      "device": "light2",
+      "state": 0
+    },
+    {
+      "boot": 1073991101,
+      "id": 11,
+      "timestamp": 1795184584,
+      "device": "fan",
+      "state": 1
+    },
+    {
+      "boot": 1073991101,
+      "id": 12,
+      "timestamp": 1795184584,
+      "device": "fan",
+      "state": 0
+    },
+    {
+      "boot": 1073991101,
+      "id": 13,
+      "timestamp": 1795185278,
+      "device": "light",
+      "state": 1
+    },
+    {
+      "boot": 1073991101,
+      "id": 14,
+      "timestamp": 1795185280,
+      "device": "light",
+      "state": 0
+    },
+    {
+      "boot": 1073991101,
+      "id": 15,
+      "timestamp": 1795185282,
+      "device": "light",
+      "state": 1
+    },
+    {
+      "boot": 1073991101,
+      "id": 16,
+      "timestamp": 1795185282,
+      "device": "light",
+      "state": 0
+    },
+    {
+      "boot": 1073991101,
+      "id": 17,
+      "timestamp": 1795185329,
+      "device": "light",
+      "state": 1
+    },
+    {
+      "boot": 1073991101,
+      "id": 18,
+      "timestamp": 1795185330,
+      "device": "light",
+      "state": 0
+    },
+    {
+      "boot": 1073991101,
+      "id": 19,
+      "timestamp": 1795185331,
+      "device": "light",
+      "state": 1
+    },
+    {
+      "boot": 1073991101,
+      "id": 20,
+      "timestamp": 1795185336,
+      "device": "light",
+      "state": 0
+    },
+    {
+      "boot": 1073991101,
+      "id": 21,
+      "timestamp": 1795185336,
+      "device": "light",
+      "state": 1
+    },
+    {
+      "boot": 1073991101,
+      "id": 22,
+      "timestamp": 1795185336,
+      "device": "light",
+      "state": 0
+    },
+    {
+      "boot": 1073991101,
+      "id": 23,
+      "timestamp": 1795185350,
+      "device": "light",
+      "state": 1
+    },
+    {
+      "boot": 1073991101,
+      "id": 24,
+      "timestamp": 1795185351,
+      "device": "light",
+      "state": 0
+    },
+    {
+      "boot": 1073991101,
+      "id": 25,
+      "timestamp": 1795185351,
+      "device": "light",
+      "state": 1
+    },
+    {
+      "boot": 1073991101,
+      "id": 26,
+      "timestamp": 1795185354,
+      "device": "light2",
+      "state": 1
+    },
+    {
+      "boot": 1073991101,
+      "id": 27,
+      "timestamp": 1795185355,
+      "device": "light2",
+      "state": 0
+    },
+    {
+      "boot": 1073991101,
+      "id": 28,
+      "timestamp": 1795185356,
+      "device": "light2",
+      "state": 1
+    },
+    {
+      "boot": 1073991101,
+      "id": 29,
+      "timestamp": 1795185357,
+      "device": "light2",
+      "state": 0
+    },
+    {
+      "boot": 1073991101,
+      "id": 30,
+      "timestamp": 1795185359,
+      "device": "light",
+      "state": 0
+    },
+    {
+      "boot": 560098073,
+      "id": 1,
+      "timestamp": 1795185578,
+      "device": "light",
+      "state": 1
+    },
+    {
+      "boot": 560098073,
+      "id": 2,
+      "timestamp": 1795185579,
+      "device": "light",
+      "state": 0
+    },
+    {
+      "boot": 560098073,
+      "id": 3,
+      "timestamp": 1795185580,
+      "device": "light",
+      "state": 1
+    },
+    {
+      "boot": 560098073,
+      "id": 4,
+      "timestamp": 1795185581,
+      "device": "light",
+      "state": 0
+    },
+    {
+      "boot": 560098073,
+      "id": 5,
+      "timestamp": 1795185582,
+      "device": "light",
+      "state": 1
+    },
+    {
+      "boot": 560098073,
+      "id": 6,
+      "timestamp": 1795185582,
+      "device": "light",
+      "state": 0
+    },
+    {
+      "boot": 560098073,
+      "id": 7,
+      "timestamp": 1795185584,
+      "device": "light",
+      "state": 1
+    },
+    {
+      "boot": 560098073,
+      "id": 8,
+      "timestamp": 1795185585,
+      "device": "light",
+      "state": 0
+    },
+    {
+      "boot": 560098073,
+      "id": 9,
+      "timestamp": 1795185586,
+      "device": "light2",
+      "state": 1
+    },
+    {
+      "boot": 560098073,
+      "id": 10,
+      "timestamp": 1795185588,
+      "device": "light2",
+      "state": 0
+    },
+    {
+      "boot": 560098073,
+      "id": 11,
+      "timestamp": 1795185599,
+      "device": "light",
+      "state": 1
+    },
+    {
+      "boot": 560098073,
+      "id": 12,
+      "timestamp": 1795185601,
+      "device": "light",
+      "state": 0
+    },
+    {
+      "boot": 560098073,
+      "id": 13,
+      "timestamp": 1795185602,
+      "device": "light",
+      "state": 1
+    },
+    {
+      "boot": 560098073,
+      "id": 14,
+      "timestamp": 1795185603,
+      "device": "light",
+      "state": 0
+    },
+    {
+      "boot": 560098073,
+      "id": 15,
+      "timestamp": 1795185620,
+      "device": "light",
+      "state": 1
+    },
+    {
+      "boot": 2849783025,
+      "id": 1,
+      "timestamp": 1795185814,
+      "device": "light",
+      "state": 0
+    },
+    {
+      "boot": 2849783025,
+      "id": 2,
+      "timestamp": 1795185815,
+      "device": "light",
+      "state": 1
+    },
+    {
+      "boot": 2849783025,
+      "id": 3,
+      "timestamp": 1795185817,
+      "device": "light",
+      "state": 0
+    },
+    {
+      "boot": 2849783025,
+      "id": 4,
+      "timestamp": 1795185853,
+      "device": "light",
+      "state": 1
+    },
+    {
+      "boot": 2849783025,
+      "id": 5,
+      "timestamp": 1795185853,
+      "device": "light",
+      "state": 0
+    },
+    {
+      "boot": 2849783025,
+      "id": 6,
+      "timestamp": 1795185855,
+      "device": "light",
+      "state": 1
+    },
+    {
+      "boot": 2849783025,
+      "id": 7,
+      "timestamp": 1795185856,
+      "device": "light",
+      "state": 0
+    },
+    {
+      "boot": 2849783025,
+      "id": 8,
+      "timestamp": 1795185858,
+      "device": "light",
+      "state": 1
+    },
+    {
+      "boot": 2849783025,
+      "id": 9,
+      "timestamp": 1795185859,
+      "device": "light",
+      "state": 0
+    },
+    {
+      "boot": 2849783025,
+      "id": 10,
+      "timestamp": 1795185861,
+      "device": "light",
+      "state": 1
+    },
+    {
+      "boot": 2849783025,
+      "id": 11,
+      "timestamp": 1795185862,
+      "device": "light",
+      "state": 0
+    },
+    {
+      "boot": 2849783025,
+      "id": 12,
+      "timestamp": 1795185889,
+      "device": "light",
+      "state": 1
+    },
+    {
+      "boot": 2849783025,
+      "id": 13,
+      "timestamp": 1795185890,
+      "device": "light2",
+      "state": 1
+    },
+    {
+      "boot": 2849783025,
+      "id": 14,
+      "timestamp": 1795185892,
+      "device": "fan",
+      "state": 1
+    },
+    {
+      "boot": 2849783025,
+      "id": 15,
+      "timestamp": 1795185893,
+      "device": "socket",
+      "state": 1
+    },
+    {
+      "boot": 2849783025,
+      "id": 16,
+      "timestamp": 1795185894,
+      "device": "light",
+      "state": 0
+    },
+    {
+      "boot": 2849783025,
+      "id": 17,
+      "timestamp": 1795185895,
+      "device": "light",
+      "state": 1
+    },
+    {
+      "boot": 2849783025,
+      "id": 18,
+      "timestamp": 1795185897,
+      "device": "light",
+      "state": 0
+    },
+    {
+      "boot": 2849783025,
+      "id": 19,
+      "timestamp": 1795185897,
+      "device": "light",
+      "state": 1
+    },
+    {
+      "boot": 2849783025,
+      "id": 20,
+      "timestamp": 1795185898,
+      "device": "light",
+      "state": 0
+    },
+    {
+      "boot": 2849783025,
+      "id": 21,
+      "timestamp": 1795185899,
+      "device": "light",
+      "state": 1
+    },
+    {
+      "boot": 2849783025,
+      "id": 22,
+      "timestamp": 1795185900,
+      "device": "light",
+      "state": 0
+    },
+    {
+      "boot": 2849783025,
+      "id": 23,
+      "timestamp": 1795185901,
+      "device": "light",
+      "state": 1
+    },
+    {
+      "boot": 2849783025,
+      "id": 24,
+      "timestamp": 1795185902,
+      "device": "light",
+      "state": 0
+    },
+    {
+      "boot": 2849783025,
+      "id": 25,
+      "timestamp": 1795185904,
+      "device": "light",
+      "state": 1
+    },
+    {
+      "boot": 2849783025,
+      "id": 26,
+      "timestamp": 1795185905,
+      "device": "light",
+      "state": 0
+    },
+    {
+      "boot": 2849783025,
+      "id": 27,
+      "timestamp": 1795185920,
+      "device": "light",
+      "state": 1
+    },
+    {
+      "boot": 2849783025,
+      "id": 28,
+      "timestamp": 1795185944,
+      "device": "light",
+      "state": 0
+    },
+    {
+      "boot": 2849783025,
+      "id": 29,
+      "timestamp": 1795185997,
+      "device": "light",
+      "state": 1
+    },
+    {
+      "boot": 2849783025,
+      "id": 30,
+      "timestamp": 1795185997,
+      "device": "light",
+      "state": 0
+    },
+    {
+      "boot": 2849783025,
+      "id": 31,
+      "timestamp": 1795186001,
+      "device": "light",
+      "state": 1
+    },
+    {
+      "boot": 2849783025,
+      "id": 32,
+      "timestamp": 1795186003,
+      "device": "light",
+      "state": 0
+    },
+    {
+      "boot": 2849783025,
+      "id": 33,
+      "timestamp": 1795186005,
+      "device": "light2",
+      "state": 0
+    },
+    {
+      "boot": 2849783025,
+      "id": 34,
+      "timestamp": 1795186006,
+      "device": "light2",
+      "state": 1
+    },
+    {
+      "boot": 2849783025,
+      "id": 35,
+      "timestamp": 1795186007,
+      "device": "light",
+      "state": 1
+    },
+    {
+      "boot": 2849783025,
+      "id": 36,
+      "timestamp": 1795186008,
+      "device": "light",
+      "state": 0
+    },
+    {
+      "boot": 2849783025,
+      "id": 37,
+      "timestamp": 1795186067,
+      "device": "light",
+      "state": 1
+    },
+    {
+      "boot": 2849783025,
+      "id": 38,
+      "timestamp": 1795186068,
+      "device": "light",
+      "state": 0
+    },
+    {
+      "boot": 2849783025,
+      "id": 39,
+      "timestamp": 1795186069,
+      "device": "light2",
+      "state": 0
+    },
+    {
+      "boot": 2849783025,
+      "id": 40,
+      "timestamp": 1795186070,
+      "device": "light2",
+      "state": 1
+    },
+    {
+      "boot": 2849783025,
+      "id": 41,
+      "timestamp": 1795186072,
+      "device": "fan",
+      "state": 0
+    },
+    {
+      "boot": 2849783025,
+      "id": 42,
+      "timestamp": 1795186073,
+      "device": "fan",
+      "state": 1
+    },
+    {
+      "boot": 2849783025,
+      "id": 43,
+      "timestamp": 1795186074,
+      "device": "fan",
+      "state": 0
+    },
+    {
+      "boot": 2849783025,
+      "id": 44,
+      "timestamp": 1795186075,
+      "device": "fan",
+      "state": 1
+    },
+    {
+      "boot": 2849783025,
+      "id": 45,
+      "timestamp": 1795186077,
+      "device": "socket",
+      "state": 0
+    },
+    {
+      "boot": 2849783025,
+      "id": 46,
+      "timestamp": 1795186078,
+      "device": "socket",
+      "state": 1
+    },
+    {
+      "boot": 2849783025,
+      "id": 47,
+      "timestamp": 1795186079,
+      "device": "light",
+      "state": 1
+    },
+    {
+      "boot": 2849783025,
+      "id": 48,
+      "timestamp": 1795186081,
+      "device": "light",
+      "state": 0
+    },
+    {
+      "boot": 2849783025,
+      "id": 49,
+      "timestamp": 1795186204,
+      "device": "light",
+      "state": 1
+    },
+    {
+      "boot": 2849783025,
+      "id": 50,
+      "timestamp": 1795186223,
+      "device": "light2",
+      "state": 0
+    },
+    {
+      "boot": 2849783025,
+      "id": 51,
+      "timestamp": 1795186244,
+      "device": "light",
+      "state": 0
+    },
+    {
+      "boot": 2849783025,
+      "id": 52,
+      "timestamp": 1795186250,
+      "device": "light",
+      "state": 1
+    },
+    {
+      "boot": 2849783025,
+      "id": 53,
+      "timestamp": 1795186257,
+      "device": "light",
+      "state": 0
+    },
+    {
+      "boot": 2849783025,
+      "id": 54,
+      "timestamp": 1795186266,
+      "device": "light",
+      "state": 1
+    },
+    {
+      "boot": 2849783025,
+      "id": 55,
+      "timestamp": 1795186271,
+      "device": "light",
+      "state": 0
+    },
+    {
+      "boot": 2849783025,
+      "id": 56,
+      "timestamp": 1795186309,
+      "device": "light",
+      "state": 1
+    },
+    {
+      "boot": 2849783025,
+      "id": 57,
+      "timestamp": 1795186312,
+      "device": "light2",
+      "state": 1
+    },
+    {
+      "boot": 2849783025,
+      "id": 58,
+      "timestamp": 1795186326,
+      "device": "light",
+      "state": 0
+    },
+    {
+      "boot": 2849783025,
+      "id": 59,
+      "timestamp": 1795186328,
+      "device": "light",
+      "state": 1
+    },
+    {
+      "boot": 2849783025,
+      "id": 60,
+      "timestamp": 1795186330,
+      "device": "light",
+      "state": 0
+    },
+    {
+      "boot": 2849783025,
+      "id": 61,
+      "timestamp": 1795186331,
+      "device": "light",
+      "state": 1
+    },
+    {
+      "boot": 2849783025,
+      "id": 62,
+      "timestamp": 1795186333,
+      "device": "light",
+      "state": 0
+    },
+    {
+      "boot": 2849783025,
+      "id": 63,
+      "timestamp": 1795186352,
+      "device": "light",
+      "state": 1
+    },
+    {
+      "boot": 2849783025,
+      "id": 64,
+      "timestamp": 1795186374,
+      "device": "light",
+      "state": 0
+    },
+    {
+      "boot": 2849783025,
+      "id": 65,
+      "timestamp": 1795186375,
+      "device": "light",
+      "state": 1
+    },
+    {
+      "boot": 2849783025,
+      "id": 66,
+      "timestamp": 1795186376,
+      "device": "light",
+      "state": 0
+    },
+    {
+      "boot": 2849783025,
+      "id": 67,
+      "timestamp": 1795186486,
+      "device": "light",
+      "state": 1
+    },
+    {
+      "boot": 2849783025,
+      "id": 68,
+      "timestamp": 1795186490,
+      "device": "light",
+      "state": 0
+    },
+    {
+      "boot": 2849783025,
+      "id": 69,
+      "timestamp": 1795186522,
+      "device": "light",
+      "state": 1
+    },
+    {
+      "boot": 2849783025,
+      "id": 70,
+      "timestamp": 1795186542,
+      "device": "light2",
+      "state": 0
+    },
+    {
+      "boot": 2849783025,
+      "id": 71,
+      "timestamp": 1795186550,
+      "device": "light2",
+      "state": 1
+    },
+    {
+      "boot": 2849783025,
+      "id": 72,
+      "timestamp": 1795186555,
+      "device": "light",
+      "state": 0
+    },
+    {
+      "boot": 2849783025,
+      "id": 73,
+      "timestamp": 1795186636,
+      "device": "light2",
+      "state": 0
+    },
+    {
+      "boot": 2849783025,
+      "id": 74,
+      "timestamp": 1795186636,
+      "device": "fan",
+      "state": 0
+    },
+    {
+      "boot": 2849783025,
+      "id": 75,
+      "timestamp": 1795186637,
+      "device": "socket",
+      "state": 0
+    },
+    {
+      "boot": 2849783025,
+      "id": 76,
+      "timestamp": 1795186649,
+      "device": "light",
+      "state": 1
+    },
+    {
+      "boot": 2849783025,
+      "id": 77,
+      "timestamp": 1795186650,
+      "device": "light2",
+      "state": 1
+    },
+    {
+      "boot": 2849783025,
+      "id": 78,
+      "timestamp": 1795186653,
+      "device": "fan",
+      "state": 1
+    },
+    {
+      "boot": 2849783025,
+      "id": 79,
+      "timestamp": 1795186655,
+      "device": "socket",
+      "state": 1
+    },
+    {
+      "boot": 2849783025,
+      "id": 80,
+      "timestamp": 1795186657,
+      "device": "light",
+      "state": 0
+    },
+    {
+      "boot": 2849783025,
+      "id": 81,
+      "timestamp": 1795186674,
+      "device": "light",
+      "state": 1
+    },
+    {
+      "boot": 2849783025,
+      "id": 82,
+      "timestamp": 1795186682,
+      "device": "light",
+      "state": 0
+    },
+    {
+      "boot": 2849783025,
+      "id": 83,
+      "timestamp": 1795186779,
+      "device": "light",
+      "state": 1
+    },
+    {
+      "boot": 2849783025,
+      "id": 84,
+      "timestamp": 1795186782,
+      "device": "light",
+      "state": 0
+    },
+    {
+      "boot": 2849783025,
+      "id": 85,
+      "timestamp": 1795186783,
+      "device": "light2",
+      "state": 0
+    },
+    {
+      "boot": 2849783025,
+      "id": 86,
+      "timestamp": 1795186838,
+      "device": "fan",
+      "state": 0
+    },
+    {
+      "boot": 2849783025,
+      "id": 87,
+      "timestamp": 1795186854,
+      "device": "fan",
+      "state": 1
+    },
+    {
+      "boot": 2849783025,
+      "id": 88,
+      "timestamp": 1795186855,
+      "device": "light2",
+      "state": 1
+    },
+    {
+      "boot": 2849783025,
+      "id": 89,
+      "timestamp": 1795187046,
+      "device": "light2",
+      "state": 0
+    },
+    {
+      "boot": 2849783025,
+      "id": 90,
+      "timestamp": 1795187048,
+      "device": "light2",
+      "state": 1
+    },
+    {
+      "boot": 2849783025,
+      "id": 91,
+      "timestamp": 1795187049,
+      "device": "light2",
+      "state": 0
+    },
+    {
+      "boot": 2849783025,
+      "id": 92,
+      "timestamp": 1795187052,
+      "device": "light",
+      "state": 1
+    },
+    {
+      "boot": 2849783025,
+      "id": 93,
+      "timestamp": 1795187056,
+      "device": "light",
+      "state": 0
+    },
+    {
+      "boot": 2849783025,
+      "id": 94,
+      "timestamp": 1795187059,
+      "device": "light2",
+      "state": 1
     }
   ]
 }

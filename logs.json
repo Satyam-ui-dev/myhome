@@ -1344,6 +1344,69 @@
       "timestamp": 1795186783,
       "device": "light2",
       "state": 0
+    },
+    {
+      "boot": 2849783025,
+      "id": 86,
+      "timestamp": 1795186838,
+      "device": "fan",
+      "state": 0
+    },
+    {
+      "boot": 2849783025,
+      "id": 87,
+      "timestamp": 1795186854,
+      "device": "fan",
+      "state": 1
+    },
+    {
+      "boot": 2849783025,
+      "id": 88,
+      "timestamp": 1795186855,
+      "device": "light2",
+      "state": 1
+    },
+    {
+      "boot": 2849783025,
+      "id": 89,
+      "timestamp": 1795187046,
+      "device": "light2",
+      "state": 0
+    },
+    {
+      "boot": 2849783025,
+      "id": 90,
+      "timestamp": 1795187048,
+      "device": "light2",
+      "state": 1
+    },
+    {
+      "boot": 2849783025,
+      "id": 91,
+      "timestamp": 1795187049,
+      "device": "light2",
+      "state": 0
+    },
+    {
+      "boot": 2849783025,
+      "id": 92,
+      "timestamp": 1795187052,
+      "device": "light",
+      "state": 1
+    },
+    {
+      "boot": 2849783025,
+      "id": 93,
+      "timestamp": 1795187056,
+      "device": "light",
+      "state": 0
+    },
+    {
+      "boot": 2849783025,
+      "id": 94,
+      "timestamp": 1795187059,
+      "device": "light2",
+      "state": 1
     }
   ]
 }
