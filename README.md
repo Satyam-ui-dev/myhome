@@ -1,7 +1,7 @@
-# Home Control
+# myhome
 
-Next.js dashboard for controlling ESP32 devices and viewing saved runtime,
-energy, and activity analysis.
+Home Control is a Next.js dashboard for controlling ESP32 devices and viewing
+saved runtime, energy, and activity analysis.
 
 ## Run the web app
 
