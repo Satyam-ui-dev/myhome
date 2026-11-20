@@ -53,7 +53,8 @@ export default function HomeControl() {
       </div>
 
       {DEVICES.map((device) => {
-        const isOn = typeof states[device.id] === "boolean" ? states[device.id] : null;
+        const reportedState = states[device.id];
+        const isOn = typeof reportedState === "boolean" ? !reportedState : null;
         return (
           <div className="card control-card" key={device.id}>
             <h3>{device.name}</h3>
