@@ -1323,6 +1323,27 @@
       "timestamp": 1795186682,
       "device": "light",
       "state": 0
+    },
+    {
+      "boot": 2849783025,
+      "id": 83,
+      "timestamp": 1795186779,
+      "device": "light",
+      "state": 1
+    },
+    {
+      "boot": 2849783025,
+      "id": 84,
+      "timestamp": 1795186782,
+      "device": "light",
+      "state": 0
+    },
+    {
+      "boot": 2849783025,
+      "id": 85,
+      "timestamp": 1795186783,
+      "device": "light2",
+      "state": 0
     }
   ]
 }
