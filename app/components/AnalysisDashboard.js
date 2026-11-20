@@ -19,6 +19,12 @@ function formatDuration(seconds) {
   return `${remainder}s`;
 }
 
+function getDisplayedState(reportedState) {
+  if (typeof reportedState === "boolean") return !reportedState;
+  if (reportedState === 0 || reportedState === 1) return reportedState === 0;
+  return null;
+}
+
 export default function AnalysisDashboard() {
   const [status, setStatus] = useState({ connected: false });
   const [events, setEvents] = useState([]);
@@ -91,23 +97,24 @@ export default function AnalysisDashboard() {
         let onAt = null;
         const rows = [];
         [...deviceEvents].reverse().forEach((event) => {
+          const isOn = getDisplayedState(event.state);
           let duration = "-";
-          if (event.state === 1) onAt = event.timestamp;
-          else if (onAt !== null) {
+          if (isOn) onAt = event.timestamp;
+          else if (isOn === false && onAt !== null) {
             duration = formatDuration(event.timestamp - onAt);
             onAt = null;
           }
           rows.push({
             timestamp: event.timestamp,
-            state: event.state,
+            state: isOn,
             duration
           });
         });
         rows.reverse();
         const lastState = deviceEvents[0]?.state;
-        const displayedState = status.connected
-          ? status[device.id]
-          : typeof lastState === "number" ? Boolean(lastState) : null;
+        const displayedState = getDisplayedState(
+          status.connected ? status[device.id] : lastState
+        );
 
         return (
           <section className="card analysis-card" key={device.id}>
