@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+import secrets
 import threading
 import time
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
@@ -10,9 +11,13 @@ from urllib.request import Request, urlopen
 
 
 ROOT = Path(__file__).resolve().parent
-LOG_PATH = ROOT / "logs.json"
+LOG_PATH = Path(os.environ.get("HOME_CONTROL_LOG_PATH", ROOT / "logs.json"))
 ESP32_URL = os.environ.get("ESP32_URL", "http://192.168.1.19").rstrip("/")
 API_KEY = os.environ.get("HOME_CONTROL_API_KEY", "change-me-123")
+ANALYSIS_API_URL = os.environ.get("ANALYSIS_API_URL", "").rstrip("/")
+ANALYSIS_INGEST_API_KEY = os.environ.get("ANALYSIS_INGEST_API_KEY", "")
+ANALYSIS_API_ONLY = os.environ.get("ANALYSIS_API_ONLY") == "1"
+STATUS_STALE_SECONDS = 15
 ALLOWED_ORIGINS = {
     "http://localhost:3000",
     "http://127.0.0.1:3000",
@@ -46,6 +51,7 @@ class LogStore:
             if isinstance(event, dict) and "boot" in event and "id" in event
         }
         self.status = None
+        self.last_status_at = None
         self.error = "Waiting for ESP32"
 
     def _write(self, data):
@@ -102,6 +108,7 @@ class LogStore:
                 for key in ("light", "light2", "fan", "socket", "up", "boot")
                 if key in status
             }
+            self.last_status_at = timestamp_now
             self.error = ""
 
     def set_error(self, message):
@@ -110,9 +117,15 @@ class LogStore:
 
     def status_snapshot(self):
         with self.lock:
+            connected = self.status is not None and not self.error
+            error = self.error
+            if (connected and self.last_status_at is not None
+                    and time.time() - self.last_status_at > STATUS_STALE_SECONDS):
+                connected = False
+                error = "Collector data is stale"
             return {
-                "connected": self.status is not None and not self.error,
-                "error": self.error,
+                "connected": connected,
+                "error": error,
                 **(self.status or {}),
             }
 
@@ -134,6 +147,11 @@ def poll_esp32():
             with urlopen(request, timeout=4) as response:
                 status = json.loads(response.read().decode("utf-8"))
             STORE.accept_status(status)
+            if ANALYSIS_API_URL:
+                try:
+                    forward_status(status)
+                except (URLError, TimeoutError, OSError, ValueError) as error:
+                    logging.warning("Analysis API forward failed: %s", error)
         except (URLError, TimeoutError, OSError, ValueError, UnicodeDecodeError,
                 json.JSONDecodeError) as error:
             STORE.set_error(str(error))
@@ -141,37 +159,112 @@ def poll_esp32():
         time.sleep(POLL_INTERVAL_SECONDS)
 
 
+def forward_status(status):
+    request = Request(
+        ANALYSIS_API_URL + "/api/ingest",
+        data=json.dumps(status).encode("utf-8"),
+        headers={
+            "Content-Type": "application/json",
+            "X-API-Key": ANALYSIS_INGEST_API_KEY,
+        },
+        method="POST",
+    )
+    with urlopen(request, timeout=4) as response:
+        if response.status != 200:
+            raise ValueError(f"Analysis API returned HTTP {response.status}")
+
+
 class RequestHandler(SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=str(ROOT), **kwargs)
+
+    def do_HEAD(self):
+        if ANALYSIS_API_ONLY:
+            self._send_json({"error": "Not found"}, 404)
+            return
+        super().do_HEAD()
 
     def do_GET(self):
         if self.path == "/api/status":
             self._send_json(STORE.status_snapshot())
         elif self.path == "/api/logs":
             self._send_json(STORE.logs_snapshot())
+        elif self.path == "/health":
+            self._send_json({"ok": True})
+        elif ANALYSIS_API_ONLY:
+            self._send_json({"error": "Not found"}, 404)
         else:
             super().do_GET()
 
-    def _send_json(self, payload):
-        body = json.dumps(payload).encode("utf-8")
-        self.send_response(200)
-        self.send_header("Content-Type", "application/json; charset=utf-8")
-        self.send_header("Content-Length", str(len(body)))
-        self.send_header("Cache-Control", "no-store")
+    def do_POST(self):
+        if self.path != "/api/ingest":
+            self._send_json({"error": "Not found"}, 404)
+            return
+        if not ANALYSIS_INGEST_API_KEY:
+            self._send_json({"error": "Ingestion API key is not configured"}, 503)
+            return
+        if not secrets.compare_digest(
+                self.headers.get("X-API-Key", ""),
+                ANALYSIS_INGEST_API_KEY):
+            self._send_json({"error": "Unauthorized"}, 401)
+            return
+
+        try:
+            content_length = int(self.headers.get("Content-Length", "0"))
+        except ValueError:
+            self._send_json({"error": "Invalid Content-Length"}, 400)
+            return
+        if content_length <= 0 or content_length > 1_000_000:
+            self._send_json({"error": "Invalid request size"}, 413)
+            return
+
+        try:
+            status = json.loads(self.rfile.read(content_length).decode("utf-8"))
+            STORE.accept_status(status)
+        except (UnicodeDecodeError, json.JSONDecodeError, ValueError) as error:
+            self._send_json({"error": str(error)}, 400)
+            return
+        self._send_json({"accepted": True})
+
+    def do_OPTIONS(self):
+        if self.path != "/api/ingest":
+            self._send_json({"error": "Not found"}, 404)
+            return
+        self.send_response(204)
+        self._set_cors_headers()
+        self.send_header("Access-Control-Allow-Methods", "POST, OPTIONS")
+        self.send_header("Access-Control-Allow-Headers", "Content-Type, X-API-Key")
+        self.end_headers()
+
+    def _set_cors_headers(self):
         origin = self.headers.get("Origin", "").rstrip("/")
         if origin in ALLOWED_ORIGINS:
             self.send_header("Access-Control-Allow-Origin", origin)
             self.send_header("Vary", "Origin")
+
+    def _send_json(self, payload, status_code=200):
+        body = json.dumps(payload).encode("utf-8")
+        self.send_response(status_code)
+        self.send_header("Content-Type", "application/json; charset=utf-8")
+        self.send_header("Content-Length", str(len(body)))
+        self.send_header("Cache-Control", "no-store")
+        self._set_cors_headers()
         self.end_headers()
         self.wfile.write(body)
 
 
 def main():
-    threading.Thread(target=poll_esp32, daemon=True).start()
-    server = ThreadingHTTPServer(("127.0.0.1", 8000), RequestHandler)
-    logging.info("Home Control page: http://127.0.0.1:8000")
-    logging.info("Polling ESP32 at %s", ESP32_URL)
+    if ANALYSIS_API_URL and not ANALYSIS_INGEST_API_KEY:
+        raise ValueError("ANALYSIS_INGEST_API_KEY is required when ANALYSIS_API_URL is set")
+    if ANALYSIS_API_ONLY and not ANALYSIS_INGEST_API_KEY:
+        raise ValueError("ANALYSIS_INGEST_API_KEY is required in API-only mode")
+    if not ANALYSIS_API_ONLY:
+        threading.Thread(target=poll_esp32, daemon=True).start()
+        logging.info("Polling ESP32 at %s", ESP32_URL)
+    host = os.environ.get("HOME_CONTROL_HOST", "127.0.0.1")
+    port = int(os.environ.get("PORT", "8000"))
+    server = ThreadingHTTPServer((host, port), RequestHandler)
+    logging.info("Home Control API listening on %s:%s", host, port)
     try:
         server.serve_forever()
     except KeyboardInterrupt:

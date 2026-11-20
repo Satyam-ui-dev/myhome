@@ -1,9 +1,11 @@
 import json
 import tempfile
 import threading
+import time
 import unittest
 from http.server import ThreadingHTTPServer
 from pathlib import Path
+from urllib.error import HTTPError
 from urllib.request import Request, urlopen
 
 import server
@@ -64,6 +66,68 @@ class LogStoreTests(unittest.TestCase):
         restarted_store.accept_status(status, received_at=101)
 
         self.assertEqual(len(restarted_store.logs_snapshot()["events"]), 1)
+
+    def test_status_snapshot_marks_stale_collector_disconnected(self):
+        self.store.accept_status({
+            "boot": 123,
+            "up": 10,
+            "events": [],
+            "light": True,
+        }, received_at=time.time() - server.STATUS_STALE_SECONDS - 1)
+
+        snapshot = self.store.status_snapshot()
+        self.assertFalse(snapshot["connected"])
+        self.assertEqual(snapshot["error"], "Collector data is stale")
+
+
+class IngestTests(unittest.TestCase):
+    def setUp(self):
+        self.temporary_directory = tempfile.TemporaryDirectory()
+        self.previous_store = server.STORE
+        self.previous_key = server.ANALYSIS_INGEST_API_KEY
+        server.STORE = LogStore(Path(self.temporary_directory.name) / "logs.json")
+        server.ANALYSIS_INGEST_API_KEY = "test-ingest-key"
+        self.httpd = ThreadingHTTPServer(("127.0.0.1", 0), server.RequestHandler)
+        self.thread = threading.Thread(target=self.httpd.serve_forever)
+        self.thread.start()
+        self.url = f"http://127.0.0.1:{self.httpd.server_port}/api/ingest"
+
+    def tearDown(self):
+        self.httpd.shutdown()
+        self.httpd.server_close()
+        self.thread.join()
+        server.STORE = self.previous_store
+        server.ANALYSIS_INGEST_API_KEY = self.previous_key
+        self.temporary_directory.cleanup()
+
+    def test_ingest_requires_shared_secret(self):
+        request = Request(self.url, data=b"{}", method="POST")
+
+        with self.assertRaises(HTTPError) as error:
+            urlopen(request)
+
+        self.assertEqual(error.exception.code, 401)
+        error.exception.close()
+
+    def test_ingest_accepts_authenticated_device_status(self):
+        status = {
+            "boot": 123,
+            "up": 10,
+            "events": [{"id": 1, "t": 2, "d": "fan", "s": 1}],
+            "fan": True,
+        }
+        request = Request(
+            self.url,
+            data=json.dumps(status).encode("utf-8"),
+            headers={"X-API-Key": "test-ingest-key"},
+            method="POST",
+        )
+
+        with urlopen(request) as response:
+            self.assertEqual(response.status, 200)
+
+        self.assertTrue(server.STORE.status_snapshot()["connected"])
+        self.assertEqual(len(server.STORE.logs_snapshot()["events"]), 1)
 
 
 class CorsTests(unittest.TestCase):

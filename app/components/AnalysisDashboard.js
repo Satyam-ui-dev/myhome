@@ -8,7 +8,9 @@ const DEVICES = [
   { id: "fan", name: "Fan", watts: 60, field: "fan_s" },
   { id: "socket", name: "5-pin socket", watts: 100, field: "socket_s" }
 ];
-const API_BASE_URL = "http://127.0.0.1:8000";
+const API_BASE_URL = (
+  process.env.NEXT_PUBLIC_ANALYSIS_API_URL || "http://127.0.0.1:8000"
+).replace(/\/+$/, "");
 
 function formatDuration(seconds) {
   const hours = Math.floor(seconds / 3600);
