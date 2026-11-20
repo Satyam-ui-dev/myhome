@@ -69,7 +69,8 @@ class LogStoreTests(unittest.TestCase):
 class CorsTests(unittest.TestCase):
     def setUp(self):
         self.previous_origins = server.ALLOWED_ORIGINS
-        server.ALLOWED_ORIGINS = {"https://home.vercel.app"}
+        server.ALLOWED_ORIGINS = set(self.previous_origins)
+        server.ALLOWED_ORIGINS.add("https://home.vercel.app")
         self.httpd = ThreadingHTTPServer(("127.0.0.1", 0), server.RequestHandler)
         self.thread = threading.Thread(target=self.httpd.serve_forever)
         self.thread.start()
@@ -89,6 +90,14 @@ class CorsTests(unittest.TestCase):
 
         with urlopen(Request(url, headers={"Origin": "https://other.example"})) as response:
             self.assertIsNone(response.headers.get("Access-Control-Allow-Origin"))
+
+    def test_api_allows_local_next_origins(self):
+        url = f"http://127.0.0.1:{self.httpd.server_port}/api/logs"
+
+        for origin in ("http://localhost:3000", "http://127.0.0.1:3000"):
+            with self.subTest(origin=origin):
+                with urlopen(Request(url, headers={"Origin": origin})) as response:
+                    self.assertEqual(response.headers["Access-Control-Allow-Origin"], origin)
 
 
 if __name__ == "__main__":

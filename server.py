@@ -14,10 +14,14 @@ LOG_PATH = ROOT / "logs.json"
 ESP32_URL = os.environ.get("ESP32_URL", "http://192.168.1.19").rstrip("/")
 API_KEY = os.environ.get("HOME_CONTROL_API_KEY", "change-me-123")
 ALLOWED_ORIGINS = {
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+}
+ALLOWED_ORIGINS.update(
     origin.strip().rstrip("/")
     for origin in os.environ.get("HOME_CONTROL_ALLOWED_ORIGINS", "").split(",")
     if origin.strip()
-}
+)
 POLL_INTERVAL_SECONDS = 1
 DEVICES = {"light", "light2", "fan", "socket"}
 
