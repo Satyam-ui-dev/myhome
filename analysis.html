@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Device Analysis</title>
+<style>
+  :root{color-scheme:dark;--page-bg:#0f172a;--surface:#1e293b;--raised:#334155;--text:#fff;--muted:#94a3b8;--border:#334155;--link:#38bdf8;--chart-grid:#334155;--chart-label:#94a3b8;--chart-bar:#38bdf8}
+  :root[data-theme="light"]{color-scheme:light;--page-bg:#f1f5f9;--surface:#fff;--raised:#e2e8f0;--text:#0f172a;--muted:#475569;--border:#cbd5e1;--link:#0369a1;--chart-grid:#cbd5e1;--chart-label:#475569;--chart-bar:#0284c7}
+  body{font-family:sans-serif;text-align:center;background:var(--page-bg);color:var(--text);padding:20px;margin:0;transition:background-color .25s ease,color .25s ease}
+  .navbar{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:8px;margin:0 auto 20px;padding:10px;background:var(--surface);border-radius:10px;max-width:760px}
+  .navbar a{padding:10px 16px;border-radius:6px;color:var(--muted);text-decoration:none;font-weight:bold}
+  .navbar a:hover,.navbar a:focus-visible,.navbar a[aria-current="page"]{background:var(--raised);color:var(--text)}
+  .theme-toggle{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-width:0;padding:9px 14px;border:1px solid var(--border);border-radius:999px;background:var(--raised);color:var(--text);font-size:14px;font-weight:bold;cursor:pointer;transition:transform .2s ease,background-color .25s ease,color .25s ease}
+  .theme-toggle:hover{transform:translateY(-2px)}
+  .theme-toggle:focus-visible{outline:3px solid var(--link);outline-offset:3px}
+  .theme-icon{display:inline-block;font-size:18px;transition:transform .45s cubic-bezier(.2,.8,.2,1)}
+  .theme-toggle:hover .theme-icon{transform:rotate(25deg) scale(1.18)}
+  .theme-toggle.animate .theme-icon{transform:rotate(180deg) scale(.65)}
+  .card{box-sizing:border-box;background:var(--surface);border-radius:10px;padding:15px;margin:15px auto;max-width:760px}
+  .muted{font-size:13px;color:var(--muted)}
+  .chart{display:block;width:100%;height:240px;margin:8px 0 12px}
+  table{width:100%;border-collapse:collapse;font-size:14px}
+  .activity-scroll{max-height:220px;overflow-y:auto;overscroll-behavior:contain}
+  .activity-scroll th{position:sticky;top:0;background:var(--surface)}
+  th,td{padding:7px 4px;border-bottom:1px solid var(--border);text-align:center}
+  th{color:var(--muted);font-weight:600}
+  .on{color:#22c55e;font-weight:bold}.off{color:#ef4444;font-weight:bold}
+  a{color:var(--link)}
+  .status{font-weight:bold}
+  @media (prefers-reduced-motion:reduce){body,.theme-toggle,.theme-icon{transition:none}.theme-toggle:hover{transform:none}}
+</style>
+<script>document.documentElement.dataset.theme=localStorage.getItem("home-control-theme")||"dark";</script>
+</head>
+<body>
+  <nav class="navbar" aria-label="Main navigation">
+    <a href="index.html">Home</a>
+    <a href="analysis.html" aria-current="page">Analysis</a>
+    <a href="about.html">About</a>
+    <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Switch to light theme" aria-pressed="false">
+      <span class="theme-icon" aria-hidden="true">☀</span><span class="theme-label">Light mode</span>
+    </button>
+  </nav>
+  <h2>Device Analysis</h2>
+  <div class="card">
+    <div id="connection" class="muted">Loading saved analysis…</div>
+    <div id="analysis-note" class="muted">Saved activity remains available while the ESP32 is offline. When the live server is unavailable, this page uses the logs.json snapshot included in the deployment.</div>
+  </div>
+
+  <main id="devices"></main>
+  <div id="error" class="muted" role="status" aria-live="polite"></div>
+
+<script>
+  const themeToggle = document.getElementById("theme-toggle");
+  function updateThemeButton() {
+    const isLight = document.documentElement.dataset.theme === "light";
+    themeToggle.setAttribute("aria-label", `Switch to ${isLight ? "dark" : "light"} theme`);
+    themeToggle.setAttribute("aria-pressed", String(isLight));
+    themeToggle.querySelector(".theme-icon").textContent = isLight ? "☾" : "☀";
+    themeToggle.querySelector(".theme-label").textContent = isLight ? "Dark mode" : "Light mode";
+  }
+  updateThemeButton();
+  themeToggle.addEventListener("click", () => {
+    const nextTheme = document.documentElement.dataset.theme === "light" ? "dark" : "light";
+    document.documentElement.dataset.theme = nextTheme;
+    localStorage.setItem("home-control-theme", nextTheme);
+    themeToggle.classList.remove("animate");
+    void themeToggle.offsetWidth;
+    themeToggle.classList.add("animate");
+    setTimeout(() => themeToggle.classList.remove("animate"), 450);
+    updateThemeButton();
+    if (latestData) {
+      const history = Array.isArray(latestData.history) ? latestData.history : [];
+      devices.forEach(device => drawChart(device, latestData.time_synced ? history : []));
+    }
+  });
+
+  const devices = [
+    { id: "light", name: "Light 1", watts: 15, timeField: "light_s" },
+    { id: "light2", name: "Light 2", watts: 15, timeField: "light2_s" },
+    { id: "fan", name: "Fan", watts: 60, timeField: "fan_s" },
+    { id: "socket", name: "5-pin socket", watts: 100, timeField: "socket_s" }
+  ];
+  const API_BASE_URL = "http://127.0.0.1:8000";
+  let latestData = null;
+
+  document.getElementById("devices").innerHTML = devices.map(device => `
+    <section class="card">
+      <h3>${device.name}</h3>
+      <p class="status" id="${device.id}-status">Status: unknown</p>
+      <p class="muted">Rated power: ${device.watts} W</p>
+      <table>
+        <tr><th>ON time (last 30 days)</th><th>Estimated energy</th></tr>
+        <tr><td id="${device.id}-runtime">--</td><td id="${device.id}-energy">--</td></tr>
+      </table>
+      <h4>Daily ON time (last 30 days)</h4>
+      <canvas id="${device.id}-chart" class="chart" role="img" aria-label="${device.name} daily on-time chart"></canvas>
+      <h4>Recent activity</h4>
+      <div class="activity-scroll" role="region" aria-label="${device.name} recent activity" tabindex="0">
+        <table id="${device.id}-events">
+          <tr><th>Time</th><th>Event</th><th>Was ON for</th></tr>
+        </table>
+      </div>
+      <p class="muted" id="${device.id}-empty">No activity yet since ESP32 started.</p>
+    </section>
+  `).join("");
+
+  function formatDuration(seconds) {
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    const s = seconds % 60;
+    if (h) return `${h}h ${m}m ${s}s`;
+    if (m) return `${m}m ${s}s`;
+    return `${s}s`;
+  }
+
+  function drawChart(device, history) {
+    const canvas = document.getElementById(`${device.id}-chart`);
+    const width = canvas.clientWidth;
+    const height = 240;
+    const ratio = window.devicePixelRatio || 1;
+    canvas.width = Math.round(width * ratio);
+    canvas.height = Math.round(height * ratio);
+    const ctx = canvas.getContext("2d");
+    ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+    ctx.clearRect(0, 0, width, height);
+
+    const pad = { left: 48, right: 12, top: 12, bottom: 34 };
+    const plotWidth = Math.max(1, width - pad.left - pad.right);
+    const plotHeight = height - pad.top - pad.bottom;
+    const maxValue = Math.max(3600, ...history.map(day => day[device.timeField] || 0));
+    ctx.font = "11px sans-serif";
+    ctx.textAlign = "right";
+    ctx.textBaseline = "middle";
+    for (let i = 0; i <= 4; i++) {
+      const y = pad.top + plotHeight - plotHeight * i / 4;
+      ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue("--chart-grid").trim();
+      ctx.beginPath();
+      ctx.moveTo(pad.left, y);
+      ctx.lineTo(width - pad.right, y);
+      ctx.stroke();
+      const value = maxValue * i / 4;
+      ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue("--chart-label").trim();
+      ctx.fillText(value >= 3600 ? `${(value / 3600).toFixed(1)}h` : `${Math.round(value / 60)}m`, pad.left - 6, y);
+    }
+
+    const groupWidth = plotWidth / Math.max(1, history.length);
+    const barWidth = Math.max(1, Math.min(12, groupWidth * 0.6));
+    history.forEach((day, index) => {
+      const seconds = day[device.timeField] || 0;
+      const barHeight = plotHeight * seconds / maxValue;
+      const x = pad.left + groupWidth * (index + 0.5);
+      ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue("--chart-bar").trim();
+      ctx.fillRect(x - barWidth / 2, pad.top + plotHeight - barHeight, barWidth, barHeight);
+      const labelEvery = Math.max(1, Math.ceil(history.length / 6));
+      if (index % labelEvery === 0 || index === history.length - 1) {
+        ctx.textAlign = "center";
+        ctx.textBaseline = "top";
+        ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue("--chart-label").trim();
+        ctx.fillText(new Date(day.d * 86400000).toLocaleDateString([], {
+          month: "short", day: "numeric", timeZone: "UTC"
+        }), x, height - pad.bottom + 8);
+      }
+    });
+  }
+
+  function updateDevice(device, data, history, bootMs) {
+    const deviceEvents = (Array.isArray(data.events) ? data.events : [])
+      .filter(event => event.d === device.id)
+      .sort((a, b) => a.t - b.t);
+    const lastEventState = deviceEvents.length ? deviceEvents[deviceEvents.length - 1].s === 1 : null;
+    const liveState = typeof data[device.id] === "boolean" ? data[device.id] : null;
+    const displayedState = data.connected ? liveState : lastEventState ?? liveState;
+    const status = document.getElementById(`${device.id}-status`);
+    status.textContent = `${data.connected ? "Status" : "Last recorded"}: ${displayedState === null ? "unknown" : displayedState ? "ON" : "OFF"}`;
+    status.className = `status ${displayedState === null ? "" : displayedState ? "on" : "off"}`;
+
+    const seconds = history.reduce((sum, day) => sum + (day[device.timeField] || 0), 0);
+    document.getElementById(`${device.id}-runtime`).textContent = data.time_synced ? formatDuration(seconds) : "--";
+    document.getElementById(`${device.id}-energy`).textContent =
+      data.time_synced ? `${(seconds * device.watts / 3600000).toFixed(3)} kWh` : "--";
+    drawChart(device, data.time_synced ? history : []);
+
+    const events = deviceEvents;
+    let onAt = null;
+    const rows = [];
+    for (const event of events) {
+      let duration = "";
+      if (event.s === 1) {
+        onAt = event.t;
+      } else if (onAt !== null) {
+        duration = formatDuration(event.t - onAt);
+        onAt = null;
+      }
+      const row = document.createElement("tr");
+      const timeCell = document.createElement("td");
+      timeCell.textContent = new Date(bootMs + event.t * 1000).toLocaleString([], {
+        day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit", second: "2-digit"
+      });
+      const eventCell = document.createElement("td");
+      eventCell.textContent = event.s ? "ON" : "OFF";
+      eventCell.className = event.s ? "on" : "off";
+      const durationCell = document.createElement("td");
+      durationCell.textContent = duration || "-";
+      row.append(timeCell, eventCell, durationCell);
+      rows.push(row);
+    }
+    rows.reverse();
+    const table = document.getElementById(`${device.id}-events`);
+    table.replaceChildren(table.rows[0]);
+    rows.forEach(row => table.appendChild(row));
+    document.getElementById(`${device.id}-empty`).style.display = rows.length ? "none" : "block";
+  }
+
+  function deriveHistory(events, nowSeconds, states) {
+    const today = Math.floor(nowSeconds / 86400);
+    const firstDay = today - 29;
+    const history = Array.from({ length: 30 }, (_, index) => ({
+      d: firstDay + index,
+      light_s: 0,
+      light2_s: 0,
+      fan_s: 0,
+      socket_s: 0
+    }));
+    const byDay = new Map(history.map(day => [day.d, day]));
+    const fieldByDevice = Object.fromEntries(devices.map(device => [device.id, device.timeField]));
+    const openIntervals = {};
+
+    function addInterval(deviceId, start, end) {
+      const field = fieldByDevice[deviceId];
+      if (!field) return;
+      let cursor = Math.max(start, firstDay * 86400);
+      while (cursor < end) {
+        const dayNumber = Math.floor(cursor / 86400);
+        const segmentEnd = Math.min(end, (dayNumber + 1) * 86400);
+        const day = byDay.get(dayNumber);
+        if (day) day[field] += segmentEnd - cursor;
+        cursor = segmentEnd;
+      }
+    }
+
+    [...events].sort((a, b) => a.timestamp - b.timestamp).forEach(event => {
+      if (!fieldByDevice[event.device]) return;
+      if (event.state === 1) {
+        openIntervals[event.device] = event.timestamp;
+      } else if (openIntervals[event.device] !== undefined) {
+        addInterval(event.device, openIntervals[event.device], event.timestamp);
+        delete openIntervals[event.device];
+      }
+    });
+
+    Object.entries(openIntervals).forEach(([deviceId, start]) => {
+      if (states.connected && states[deviceId] === true) addInterval(deviceId, start, nowSeconds);
+    });
+    return history;
+  }
+
+  async function fetchJson(url) {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 4000);
+    try {
+      const response = await fetch(url, { signal: controller.signal, cache: "no-store" });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      return await response.json();
+    } finally {
+      clearTimeout(timeout);
+    }
+  }
+
+  async function refresh() {
+    const [statusResult, logsResult] = await Promise.allSettled([
+      fetchJson(`${API_BASE_URL}/api/status`),
+      fetchJson(`${API_BASE_URL}/api/logs`)
+    ]);
+    const status = statusResult.status === "fulfilled" ? statusResult.value : { connected: false };
+    let logs = logsResult.status === "fulfilled" ? logsResult.value : null;
+    let usingSnapshot = false;
+
+    if (!logs || !Array.isArray(logs.events)) {
+      try {
+        logs = await fetchJson("logs.json");
+        usingSnapshot = true;
+      } catch (error) {
+        document.getElementById("connection").textContent = "Cannot load saved analysis";
+        document.getElementById("error").textContent = `Error: ${error.message}`;
+        return;
+      }
+    }
+
+    try {
+      if (!Array.isArray(logs.events)) throw new Error("logs.json must contain an events array");
+      const events = logs.events;
+      const nowSeconds = Math.floor(Date.now() / 1000);
+      latestData = {
+        ...status,
+        time_synced: true,
+        history: deriveHistory(events, nowSeconds, status),
+        events: events.map(event => ({ d: event.device, t: event.timestamp, s: event.state }))
+      };
+      document.getElementById("connection").textContent = usingSnapshot
+        ? "Showing the saved logs.json snapshot from this deployment"
+        : status.connected
+          ? "Connected to ESP32 through the local server"
+          : "ESP32 offline — showing saved analysis";
+      document.getElementById("error").textContent = usingSnapshot
+        ? "This snapshot only includes events present when the site was deployed."
+        : status.error || "";
+      devices.forEach(device => updateDevice(device, latestData, latestData.history, 0));
+    } catch (error) {
+      document.getElementById("connection").textContent = "Cannot display saved analysis";
+      document.getElementById("error").textContent = `Error: ${error.message}`;
+    }
+  }
+
+  window.addEventListener("resize", () => {
+    if (!latestData) return;
+    const history = Array.isArray(latestData.history) ? latestData.history : [];
+    devices.forEach(device => drawChart(device, latestData.time_synced ? history : []));
+  });
+  refresh();
+  setInterval(refresh, 3000);
+</script>
+</body>
+</html>
