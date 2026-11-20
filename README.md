@@ -16,34 +16,38 @@ In a second terminal, run `python server.py` to collect ESP32 logs. The app
 reads fresh logs from `http://127.0.0.1:8000` and falls back to the deployment
 snapshot in `public/logs.json`.
 
-## Live analysis on deployment
+## Live analysis on Vercel
 
-The deployed analysis page cannot use `127.0.0.1`: that address refers to the
-visitor's computer. This repository includes a Render API service definition
-(`render.yaml`) with persistent storage. Deploy it as a Render Blueprint and
-set `HOME_CONTROL_ALLOWED_ORIGINS` to the exact HTTPS origin of the deployed
-Next.js site (for example, `https://your-site.vercel.app`).
+The deployed analysis page uses Vercel API routes and Supabase for online
+status and event storage. In Supabase, create a project and run
+[`supabase/schema.sql`](./supabase/schema.sql) in the SQL Editor.
 
-The Render service generates `ANALYSIS_INGEST_API_KEY`. Set the following
-environment variables on the computer running the ESP32 collector, then start
-`python server.py`. The collector continues polling the ESP32 on the LAN and
-forwards each status update to Render:
+Set these environment variables in the Vercel project settings:
+
+- `SUPABASE_URL`: the Supabase project URL.
+- `SUPABASE_SERVICE_ROLE_KEY`: the Supabase service-role key. Keep it server
+  side; never use a `NEXT_PUBLIC_` prefix.
+- `ANALYSIS_INGEST_API_KEY`: a long random secret used to authenticate the
+  collector.
+
+Redeploy the Vercel app after setting the variables. The API provides
+`GET /api/status`, `GET /api/logs`, and protected `POST /api/ingest` and
+`POST /api/import` endpoints.
+
+The ESP32 stays private on the home network. Run the collector on a computer
+on that network, set the URL of the deployed Vercel site and the same ingest
+secret, then start `python server.py`:
 
 ```powershell
-$env:ANALYSIS_API_URL = "https://your-api-service.onrender.com"
-$env:ANALYSIS_INGEST_API_KEY = "<value from Render>"
+$env:ANALYSIS_API_URL = "https://your-site.vercel.app"
+$env:ANALYSIS_INGEST_API_KEY = "<same secret set in Vercel>"
 python server.py
 ```
 
-In the Next.js deployment settings, set
-`NEXT_PUBLIC_ANALYSIS_API_URL` to the same Render service URL and redeploy the
-frontend. The analysis API provides `GET /api/status` and `GET /api/logs`;
-`POST /api/ingest` is protected by `ANALYSIS_INGEST_API_KEY`. Keep that key
-only in Render and the collector environment, never in the frontend.
-
-The ESP32 stays private on the home network; the collector sends outbound
-HTTPS updates, so the backend does not need direct access to the ESP32.
-Render's persistent disk requires a paid service plan.
+Keep the collector running so it can forward switch status and events
+continuously. On startup it also backfills the existing local `logs.json` in
+batches. Supabase stores every unique event online; its primary key prevents
+duplicate events during backfill or when the ESP32 repeats recent data.
 
 ## Static analysis snapshot
 

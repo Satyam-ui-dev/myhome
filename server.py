@@ -16,7 +16,6 @@ ESP32_URL = os.environ.get("ESP32_URL", "http://192.168.1.19").rstrip("/")
 API_KEY = os.environ.get("HOME_CONTROL_API_KEY", "change-me-123")
 ANALYSIS_API_URL = os.environ.get("ANALYSIS_API_URL", "").rstrip("/")
 ANALYSIS_INGEST_API_KEY = os.environ.get("ANALYSIS_INGEST_API_KEY", "")
-ANALYSIS_API_ONLY = os.environ.get("ANALYSIS_API_ONLY") == "1"
 STATUS_STALE_SECONDS = 15
 ALLOWED_ORIGINS = {
     "http://localhost:3000",
@@ -138,6 +137,8 @@ STORE = LogStore(LOG_PATH)
 
 
 def poll_esp32():
+    history_offset = 0
+    history_synced = not ANALYSIS_API_URL
     while True:
         try:
             request = Request(
@@ -156,6 +157,17 @@ def poll_esp32():
                 json.JSONDecodeError) as error:
             STORE.set_error(str(error))
             logging.warning("ESP32 poll failed: %s", error)
+        if not history_synced:
+            try:
+                saved_events = STORE.logs_snapshot()["events"]
+                while history_offset < len(saved_events):
+                    batch = saved_events[history_offset:history_offset + 500]
+                    forward_history(batch)
+                    history_offset += len(batch)
+                history_synced = True
+                logging.info("Saved local analysis history to the online API")
+            except (URLError, TimeoutError, OSError, ValueError) as error:
+                logging.warning("Analysis history sync failed: %s", error)
         time.sleep(POLL_INTERVAL_SECONDS)
 
 
@@ -174,15 +186,24 @@ def forward_status(status):
             raise ValueError(f"Analysis API returned HTTP {response.status}")
 
 
+def forward_history(events):
+    request = Request(
+        ANALYSIS_API_URL + "/api/import",
+        data=json.dumps({"events": events}).encode("utf-8"),
+        headers={
+            "Content-Type": "application/json",
+            "X-API-Key": ANALYSIS_INGEST_API_KEY,
+        },
+        method="POST",
+    )
+    with urlopen(request, timeout=10) as response:
+        if response.status != 200:
+            raise ValueError(f"Analysis API returned HTTP {response.status}")
+
+
 class RequestHandler(SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=str(ROOT), **kwargs)
-
-    def do_HEAD(self):
-        if ANALYSIS_API_ONLY:
-            self._send_json({"error": "Not found"}, 404)
-            return
-        super().do_HEAD()
 
     def do_GET(self):
         if self.path == "/api/status":
@@ -191,8 +212,6 @@ class RequestHandler(SimpleHTTPRequestHandler):
             self._send_json(STORE.logs_snapshot())
         elif self.path == "/health":
             self._send_json({"ok": True})
-        elif ANALYSIS_API_ONLY:
-            self._send_json({"error": "Not found"}, 404)
         else:
             super().do_GET()
 
@@ -256,11 +275,8 @@ class RequestHandler(SimpleHTTPRequestHandler):
 def main():
     if ANALYSIS_API_URL and not ANALYSIS_INGEST_API_KEY:
         raise ValueError("ANALYSIS_INGEST_API_KEY is required when ANALYSIS_API_URL is set")
-    if ANALYSIS_API_ONLY and not ANALYSIS_INGEST_API_KEY:
-        raise ValueError("ANALYSIS_INGEST_API_KEY is required in API-only mode")
-    if not ANALYSIS_API_ONLY:
-        threading.Thread(target=poll_esp32, daemon=True).start()
-        logging.info("Polling ESP32 at %s", ESP32_URL)
+    threading.Thread(target=poll_esp32, daemon=True).start()
+    logging.info("Polling ESP32 at %s", ESP32_URL)
     host = os.environ.get("HOME_CONTROL_HOST", "127.0.0.1")
     port = int(os.environ.get("PORT", "8000"))
     server = ThreadingHTTPServer((host, port), RequestHandler)

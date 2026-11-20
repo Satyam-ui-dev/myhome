@@ -9,7 +9,8 @@ const DEVICES = [
   { id: "socket", name: "5-pin socket", watts: 100, field: "socket_s" }
 ];
 const API_BASE_URL = (
-  process.env.NEXT_PUBLIC_ANALYSIS_API_URL || "http://127.0.0.1:8000"
+  process.env.NEXT_PUBLIC_ANALYSIS_API_URL
+  || (process.env.NODE_ENV === "development" ? "http://127.0.0.1:8000" : "")
 ).replace(/\/+$/, "");
 
 function formatDuration(seconds) {
@@ -51,7 +52,9 @@ export default function AnalysisDashboard() {
       fetchJson(`${API_BASE_URL}/api/logs`)
     ]);
 
-    let nextStatus = statusResult.status === "fulfilled" ? statusResult.value : { connected: false };
+    const nextStatus = statusResult.status === "fulfilled"
+      ? statusResult.value
+      : { connected: false };
     let logs = logsResult.status === "fulfilled" ? logsResult.value : null;
     let snapshot = false;
     if (!logs || !Array.isArray(logs.events)) {
@@ -74,9 +77,16 @@ export default function AnalysisDashboard() {
           ? "Connected to ESP32 through the local server"
           : "ESP32 offline — showing saved analysis"
     );
-    setError(snapshot
-      ? "This snapshot only includes events present when the site was deployed."
-      : nextStatus.error || "");
+    const messages = [];
+    if (snapshot) {
+      messages.push("This snapshot only includes events present when the site was deployed.");
+    }
+    if (statusResult.status === "rejected") {
+      messages.push(`Live status unavailable: ${statusResult.reason.message}`);
+    } else if (nextStatus.error) {
+      messages.push(nextStatus.error);
+    }
+    setError(messages.join(" "));
   }
 
   useEffect(() => {
